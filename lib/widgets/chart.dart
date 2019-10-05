@@ -47,7 +47,7 @@ class Chart extends StatelessWidget {
             (data) {
               return Flexible(
                 fit: FlexFit.tight,
-                            child: ChartBar(
+                child: ChartBar(
                     data['day'],
                     data['amount'],
                     totalSpending == 0.0
