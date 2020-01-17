@@ -1,185 +1,59 @@
-import 'package:budgetplanner/widgets/transaction_list.dart';
-import 'package:flutter/services.dart';
-
-import './widgets/new_transaction.dart';
-import './widgets/transaction_list.dart';
 import 'package:flutter/material.dart';
-import './models/transaction.dart';
-import './widgets/chart.dart';
+import 'package:splashscreen/splashscreen.dart';
+import './widgets/login.dart';
+import './functions.dart';
+import './home.dart';
 
+// x-x-x-x-x-x-x-x-x-x--x-x-x-x-x-x-x-x-x-x-x-x-x-x--x-x-x-x-x-x-x-x-x-x-x-x-
+
+var body;
 void main() {
-  // SystemChrome.setPreferredOrientations(
-  //     [DeviceOrientation.portraitUp, DeviceOrientation.portraitUp]);
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Budget Planner',
-      theme: ThemeData(
+  runApp(new MaterialApp(
+    theme: ThemeData(
         primarySwatch: Colors.blue,
         accentColor: Colors.blue,
         errorColor: Colors.red,
+        scaffoldBackgroundColor: Colors.white,
+        backgroundColor: Colors.white,
         fontFamily: 'ProductSans',
       ),
-      home: MyHomePage(),
-    );
-  }
+    debugShowCheckedModeBanner: false,
+    home: new MyApp(),
+  ));
+
+  checkUser().then((msg) {
+    if (msg == "true") {
+      body = new Home();
+    } else {
+      body = new UserLogin();
+    }
+  });
 }
 
-class MyHomePage extends StatefulWidget {
+class MyApp extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyAppState createState() => new _MyAppState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final List<Transaction> _userTransactions = [
-    // Transaction(
-    //   amount: 68.99,
-    //   id: 't1',
-    //   title: 'New shoes',
-    //   date: DateTime.now(),
-    // ),
-    // Transaction(
-    //   amount: 79.99,
-    //   id: 't2',
-    //   title: 'New shirts',
-    //   date: DateTime.now(),
-    // ),
-    // Transaction(
-    //   amount: 89.99,
-    //   id: 't3',
-    //   title: 'New t shirts',
-    //   date: DateTime.now(),
-    // ),
-  ];
-
-  bool _showChart = false;
-
-  List<Transaction> get _recentTransactions {
-    return _userTransactions.where(
-      (tx) {
-        return tx.date.isAfter(
-          DateTime.now().subtract(
-            Duration(days: 7),
-          ),
-        );
-      },
-    ).toList();
-  }
-
-  void _addNewTransaction(
-      String txTitle, double txAmount, DateTime choosenDate) {
-    final newTx = Transaction(
-      title: txTitle,
-      amount: txAmount,
-      date: choosenDate,
-      id: DateTime.now().toString(),
-    );
-    setState(
-      () {
-        _userTransactions.add(newTx);
-      },
-    );
-  }
-
-  void _startAddNewTransaction(BuildContext ctx) {
-    showModalBottomSheet(
-      context: ctx,
-      builder: (_) {
-        return GestureDetector(
-          child: NewTransaction(_addNewTransaction),
-          onTap: () {},
-          behavior: HitTestBehavior.opaque,
-        );
-      },
-    );
-  }
-
-  void _deleteTransaction(String id) {
-    setState(() {
-      _userTransactions.removeWhere(
-        (tx) => (tx.id == id),
-      );
-    });
-  }
-
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final isLandscape =
-        mediaQuery.orientation == Orientation.landscape;
-    final appBar = AppBar(
-      title: Text("Budget planner"),
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(
-            Icons.add,
-            color: Colors.white,
-          ),
-          onPressed: () => _startAddNewTransaction(context),
-        )
-      ],
+    return new SplashScreen(
+      seconds: 5,
+      navigateAfterSeconds: new AfterSplash(),
+      image: new Image.asset("assets/images/logo2.png"),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      styleTextUnderTheLoader: new TextStyle(),
+      photoSize: 120.0,
+      onClick: () => print("Flutter Egypt"),
+      loaderColor: Theme.of(context).primaryColor,
     );
-    final txListWidget = Container(
-      height: (mediaQuery.size.height -
-              appBar.preferredSize.height -
-              mediaQuery.padding.top) *
-          0.7,
-      child: TransactionList(_userTransactions, _deleteTransaction),
-    );
+  }
+}
 
-    return Scaffold(
-      appBar: appBar,
-      body: SingleChildScrollView(
-        child: Column(
-          // mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            if (isLandscape)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text('Show Chart'),
-                  Switch(
-                    value: _showChart,
-                    onChanged: (val) {
-                      setState(() {
-                        _showChart = val;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            if (!isLandscape)
-              Container(
-                height: (mediaQuery.size.height -
-                        appBar.preferredSize.height -
-                        mediaQuery.padding.top) *
-                    0.3,
-                child: Chart(_recentTransactions),
-              ),
-            if (!isLandscape) txListWidget,
-            if (isLandscape)
-              _showChart
-                  ? Container(
-                      height: (mediaQuery.size.height -
-                              appBar.preferredSize.height -
-                              mediaQuery.padding.top) *
-                          0.7,
-                      child: Chart(_recentTransactions),
-                    )
-                  : txListWidget
-          ],
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () => _startAddNewTransaction(context),
-      ),
-    );
+class AfterSplash extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(body: body);
   }
 }

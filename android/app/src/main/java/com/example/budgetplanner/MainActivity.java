@@ -1,4 +1,4 @@
-package com.example.budgetplanner;
+package com.example.servicefinder;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
